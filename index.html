@@ -1,0 +1,94 @@
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.0/angular.min.js"></script>
+	<title>Firebase</title>
+</head>
+<body>
+	<h1>Post</h1>
+
+	<form>
+		title: <input type="text" id="title"/> <br/>
+		body: <input type="text" id="body"/> <br/>
+		<input type="submit" name="submit" onclick="handlerform()"><br/>
+	</form>
+
+	<div id="div-post">
+		<ul id="ul-post">
+			<li>coba</li>
+		</ul>
+	</div>
+
+	<script src="https://www.gstatic.com/firebasejs/3.6.4/firebase.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script>
+
+		var post = new Array();
+		var postidx = 0;
+
+		$(document).ready(function(){
+			getAllPost();
+			updateUI();
+		});
+		
+		// Initialize Firebase
+		/**********************************************************
+		Inisialisasi konfigurasi di sini
+		**********************************************************/
+
+		// Get a reference to the database service
+		var database = firebase.database();
+
+		function handlerform(){
+			writeNewPost(1,"Nugsky","aaa",$("#title").val(),$("#body").val());
+			getAllPost();
+			updateUI();
+		}
+
+		function writeNewPost(uid, username, picture, title, body) {
+			// A post entry.
+			var postData = {
+				author: username,
+				uid: uid,
+				body: body,
+				title: title,
+				starCount: 0,
+				authorPic: picture
+			};
+
+			// Get a key for a new Post.
+			var newPostKey = firebase.database().ref().child('posts').push().key;
+
+			// Write the new post's data simultaneously in the posts list and the user's post list.
+			var updates = {};
+			updates['/posts/' + newPostKey] = postData;
+
+			alert("berhasil");
+
+			return firebase.database().ref().update(updates);
+		}
+
+		function getAllPost(){
+			return firebase.database().ref('/posts').on('value', function(snapshot) {
+				var posthtml = "";
+				snapshot.forEach(function(childsnapshot){
+					posthtml += "<li>";
+					posthtml += childsnapshot.val().title;
+					posthtml += "</li>";
+				})
+				$("#ul-post").html(posthtml);
+			});
+		}
+
+		function updateUI(){
+			var posthtml = ``;
+			for (var i=0;i<postidx;i++){
+				console.log(post[i]);
+				posthtml += "<li>";
+				posthtml += post[i];
+				posthtml += "</li>";
+			}
+			$("#ul-post").html(posthtml);
+		}
+	</script>
+</body>
+</html>
